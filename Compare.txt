@@ -1,6 +1,19 @@
 index=your_index earliest=-1w@w latest=now
 | eval day_of_week = strftime(_time, "%A")
 | search day_of_week IN ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+
+index=your_index earliest=-1w@w latest=now
+| eval day_of_week = strftime(_time, "%A")
+| search day_of_week IN ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 | eval week = if(_time >= relative_time(now(), "@w") AND _time <= now(), "current_week", "last_week")
 | stats count by day_of_week, week
+| eval day_order = case(
+    day_of_week=="Monday", 1,
+    day_of_week=="Tuesday", 2,
+    day_of_week=="Wednesday", 3,
+    day_of_week=="Thursday", 4,
+    day_of_week=="Friday", 5
+)
+| sort day_order
 | xyseries day_of_week week count
