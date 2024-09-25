@@ -1,23 +1,5 @@
-### Conclusion
-index=your_index earliest=-1w@w latest=now
+index=your_index earliest=-2w@w5 latest=now
 | eval day_of_week = strftime(_time, "%A")
-| eval week = if(_time >= relative_time(now(), "@w") AND _time <= now(), "current_week", "last_week")
+| eval week = if(_time >= relative_time(now(), "-1w@w5") AND _time <= now(), "current_week", "last_week")
 | stats count by day_of_week, week
 | xyseries day_of_week week count
-1. **Faster Upgrades**: Both OpenRewrite and GitHub Copilot streamline Java version upgrades, reducing manual effort and time.
-2. **OpenRewrite**: Best suited for large-scale, rule-based refactoring with high consistency across projects.
-3. **GitHub Copilot**: Offers flexible, AI-driven suggestions in real-time, enhancing developer productivity directly within the IDE.
-4. **Pros & Cons**: OpenRewrite excels at complex bulk changes, while GitHub Copilot provides more flexibility but may occasionally suggest incomplete solutions.
-5. **Key Advantage**: GitHub Copilot’s adaptability and real-time assistance make it a more versatile tool for incremental upgrades and developer-centric tasks.
-
-### Conclusion
-
-1. **Faster Upgrades**: Both OpenRewrite and GitHub Copilot can reduce Java version upgrade time by up to 50%, saving valuable development hours.
-   
-2. **OpenRewrite**: Best for large-scale projects, saving **2-3 hours per component** on rule-based, automated refactoring.
-
-3. **GitHub Copilot**: Offers real-time suggestions, reducing manual code updates and saving **1-2 hours per component** through faster code review and modification.
-
-4. **Pros & Cons**: OpenRewrite handles complex, bulk changes efficiently but requires setup. GitHub Copilot, though sometimes incomplete, is flexible and adapts to various code scenarios.
-
-5. **Key Advantage**: By leveraging GitHub Copilot, developers can save **10-15 hours per project** on incremental upgrades, significantly speeding up the process with contextual, in-IDE support.
