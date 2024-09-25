@@ -17,3 +17,13 @@ index=your_index earliest=-1w@w latest=now
 )
 | sort day_order
 | xyseries day_of_week week count
+
+
+index=your_index earliest=-1w@w latest=now
+| eval date = strftime(_time, "%Y-%m-%d")
+| where strftime(_time, "%A") IN ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+| eval week = if(_time >= relative_time(now(), "@w") AND _time <= now(), "current_week", "last_week")
+| stats count by date, week
+| eval day_order = strftime(_time, "%Y-%m-%d")
+| sort 0 day_order
+| xyseries date week count
