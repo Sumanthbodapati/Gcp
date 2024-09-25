@@ -1,5 +1,9 @@
 ### Conclusion
-
+index=your_index earliest=-1w@w latest=now
+| eval day_of_week = strftime(_time, "%A")
+| eval week = if(_time >= relative_time(now(), "@w") AND _time <= now(), "current_week", "last_week")
+| stats count by day_of_week, week
+| xyseries day_of_week week count
 1. **Faster Upgrades**: Both OpenRewrite and GitHub Copilot streamline Java version upgrades, reducing manual effort and time.
 2. **OpenRewrite**: Best suited for large-scale, rule-based refactoring with high consistency across projects.
 3. **GitHub Copilot**: Offers flexible, AI-driven suggestions in real-time, enhancing developer productivity directly within the IDE.
