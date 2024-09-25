@@ -44,3 +44,27 @@ index=your_index earliest=-1w@w latest=now
 | sort 0 day_order
 | xyseries day_of_week week count
 
+
+
+index=your_index earliest=-5w@w latest=now
+| eval day_of_week = strftime(_time, "%A"), date = strftime(_time, "%Y-%m-%d")
+| search day_of_week IN ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+| eval week_number = ceil((relative_time(now(), "@w") - _time) / 604800) 
+| eval week_label = case(
+    week_number==1, "Current Week",
+    week_number==2, "Last Week",
+    week_number==3, "2 Weeks Ago",
+    week_number==4, "3 Weeks Ago",
+    week_number==5, "4 Weeks Ago"
+)
+| stats count by day_of_week, week_label
+| eval day_order = case(
+    day_of_week=="Monday", 1,
+    day_of_week=="Tuesday", 2,
+    day_of_week=="Wednesday", 3,
+    day_of_week=="Thursday", 4,
+    day_of_week=="Friday", 5
+)
+| sort 0 day_order
+| xyseries day_of_week week_label count
+
