@@ -1,0 +1,41 @@
+Here’s how you can categorize and reword the provided points in your self-appraisal:
+
+Project Delivery and Execution
+
+	1.	Delivered the Pindrop Agent project from design to execution, which is now in the pilot phase. This project is expected to save approximately $32,500 monthly and reduce Full-Time Equivalent (FTE) resources significantly.
+	2.	Led the Pindrop CCIVR project from concept to delivery, aiming to significantly reduce fraud losses.
+	3.	Delivered critical features such as Digital, Branch Wires, and Direct Pay, enhancing fraud prevention capabilities across the system.
+
+Initiatives and Process Improvements
+
+	1.	Successfully integrated the Orchestra Framework into one of the initial components, making our team the first within FSRV to adopt this framework in production.
+	2.	Spearheaded the FSRV Modernization focus group, documenting all 30 components in FSRV on Mural, facilitating the decomposition of applications from monoliths to microservices.
+	3.	Led the effort to establish a new LOAD test environment, addressing the development team’s challenges with limited testing setups, thereby stabilizing the ET environment for client benefit.
+
+Problem Solving and Innovation
+
+	1.	Developed an innovative voice fraud detection solution during a hackathon using the latest technologies and AI models, which was successfully presented.
+	2.	Proposed an optimization to resolve a database lag issue by improving logging processes, resulting in better DB capacity and reduced data movement over the network.
+	3.	Led a POC on Java upgrades using OpenRewrite and GitHub Copilot, significantly reducing manual migration efforts. The initiative was well received by senior leadership.
+
+Compliance and Security
+
+	1.	Collaborated with multiple stakeholders on compliance initiatives, including cyber resiliency and data quality assessments, to ensure timely resolution of issues alongside Madhuri.
+	2.	Provided support for the Harness migration from UCD by resolving critical issues, a key step in our applications’ migration to the cloud.
+
+Mentorship and Leadership
+
+	1.	Guided the team in improving JUnit test coverage, achieving 80% coverage across most legacy code components, greatly enhancing code quality.
+	2.	Worked closely with Level 2 architects on new intake projects, contributing to solution design and offering optimal technical recommendations.
+
+Cross-Functional Collaboration
+
+	1.	Worked on the POCs for EPL X, the next-generation CI/CD tool leveraging GitHub Cloud and GitHub Actions, helping onboard our app to Elastic for distributed tracing and metrics monitoring.
+	2.	Collaborated with stakeholders in working on technology compliance issues, including supporting the resolution of cyber resiliency and data quality issues across the organization.
+
+This structure highlights your leadership, technical skills, and contributions across multiple areas, making a strong case for your performance.
+
+Throughout this year, I have led key initiatives, including the Pindrop Agent, Pindrop CCIVR, and the delivery of critical features like Digital, Branch Wires, and Direct Pay, all of which have significantly improved fraud prevention and are expected to result in major cost savings. My leadership extended beyond project execution as I spearheaded the FSRV Modernization focus group, driving the decomposition of monolithic applications into microservices. I also implemented  technologies like the Orchestra Framework , Elastic APM and optimisation of database performance, which will contribute to overall operational efficiency.
+
+In addition to delivering on project goals, I have been focused on enhancing engineering practices, achieving 80% JUnit test coverage for legacy code, and supporting compliance initiatives . I actively collaborated on tech modernization efforts, including Java upgrade automation using OpenRewrite and GitHub Copilot, and worked on the POC for next-gen CI/CD tools. 
+Moving forward, I aim to continue driving technical innovation and foster cross-functional collaboration to ensure our teams are equipped for future challenges.
