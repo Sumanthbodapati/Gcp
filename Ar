@@ -1,1 +1,219 @@
 
+Here is a complete Spring Boot project using Apache CXF and mutual TLS (mTLS) for calling a SOAP web service, along with Gradle configuration.
+
+1. Project Structure
+
+spring-boot-cxf-soap-client
+│── src
+│   ├── main
+│   │   ├── java
+│   │   │   ├── com.example.soapclient
+│   │   │   │   ├── config
+│   │   │   │   │   ├── CxfClientConfig.java
+│   │   │   │   ├── client
+│   │   │   │   │   ├── SoapClient.java
+│   │   │   │   ├── model (Generated from WSDL)
+│   │   │   │   ├── Application.java
+│   │   ├── resources
+│   │   │   ├── wsdl (Place your WSDL and XSDs here)
+│   │   │   │   ├── service.wsdl
+│   │   │   ├── keystore
+│   │   │   │   ├── client-keystore.jks
+│   │   │   │   ├── truststore.jks
+│   │   │   ├── application.properties
+│── build.gradle
+│── settings.gradle
+│── README.md
+
+2. build.gradle (Gradle Configuration)
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.1'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '1.0.0'
+java.sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Apache CXF for SOAP
+    implementation 'org.apache.cxf:cxf-spring-boot-starter-jaxws:4.0.3'
+
+    // JAXB for XML handling
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
+
+    // Apache HttpClient for SSL
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+
+    // WSDL Code Generation
+    implementation 'org.apache.cxf:cxf-tools:4.0.3'
+}
+
+tasks.register('generateSoapClient', JavaExec) {
+    mainClass = 'org.apache.cxf.tools.wsdlto.WSDLToJava'
+    classpath = sourceSets.main.runtimeClasspath
+    args = [
+        '-d', "${projectDir}/src/main/java",
+        '-p', 'com.example.soapclient.model',
+        "${projectDir}/src/main/resources/wsdl/service.wsdl"
+    ]
+}
+
+Run:
+
+./gradlew generateSoapClient
+
+This will generate Java classes from the WSDL in src/main/java/com/example/soapclient/model.
+
+3. application.properties (Configuration)
+
+# SOAP Service URL
+soap.service.url=https://your-soap-endpoint
+
+# Keystore for client certificate authentication
+cxf.tls.key-store=classpath:keystore/client-keystore.jks
+cxf.tls.key-store-password=changeit
+cxf.tls.key-store-type=JKS
+
+# Truststore for validating server certificate
+cxf.tls.trust-store=classpath:keystore/truststore.jks
+cxf.tls.trust-store-password=changeit
+cxf.tls.trust-store-type=JKS
+
+4. CxfClientConfig.java (CXF Configuration for mTLS)
+
+package com.example.soapclient.config;
+
+import org.apache.cxf.configuration.jsse.TLSClientParameters;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.InputStream;
+import java.security.KeyStore;
+
+@Configuration
+public class CxfClientConfig {
+
+    @Bean
+    public SomeWebService someWebService() throws Exception {
+        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
+        factory.setServiceClass(SomeWebService.class);
+        factory.setAddress("https://your-soap-endpoint");
+
+        SomeWebService client = (SomeWebService) factory.create();
+        configureSSL(client);
+        return client;
+    }
+
+    private void configureSSL(Object client) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        try (InputStream keyStoreStream = new ClassPathResource("keystore/client-keystore.jks").getInputStream()) {
+            keyStore.load(keyStoreStream, "changeit".toCharArray());
+        }
+
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        try (InputStream trustStoreStream = new ClassPathResource("keystore/truststore.jks").getInputStream()) {
+            trustStore.load(trustStoreStream, "changeit".toCharArray());
+        }
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore, "changeit".toCharArray());
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStore);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+        TLSClientParameters tlsParams = new TLSClientParameters();
+        tlsParams.setSSLSocketFactory(sslContext.getSocketFactory());
+
+        HTTPConduit conduit = (HTTPConduit) ((Client) client).getConduit();
+        conduit.setTlsClientParameters(tlsParams);
+    }
+}
+
+5. SoapClient.java (Calling the SOAP Service)
+
+package com.example.soapclient.client;
+
+import com.example.soapclient.model.SomeRequest;
+import com.example.soapclient.model.SomeResponse;
+import com.example.soapclient.model.SomeWebService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SoapClient {
+
+    @Autowired
+    private SomeWebService someWebService;
+
+    public SomeResponse invokeSoapService(SomeRequest request) {
+        return someWebService.someOperation(request);
+    }
+}
+
+6. Application.java (Main Class)
+
+package com.example.soapclient;
+
+import com.example.soapclient.client.SoapClient;
+import com.example.soapclient.model.SomeRequest;
+import com.example.soapclient.model.SomeResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application implements CommandLineRunner {
+
+    @Autowired
+    private SoapClient soapClient;
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+    @Override
+    public void run(String... args) {
+        SomeRequest request = new SomeRequest();
+        request.setField("value");
+
+        SomeResponse response = soapClient.invokeSoapService(request);
+        System.out.println("SOAP Response: " + response.getResult());
+    }
+}
+
+7. Running the Application
+
+./gradlew bootRun
+
+This will start the application and call the SOAP service using mutual TLS authentication.
+
+Summary
+
+✅ Uses Apache CXF for SOAP calls
+✅ Uses Gradle
+✅ Implements mutual TLS (mTLS) with a keystore and truststore
+✅ Generates SOAP client classes from WSDL using CXF WSDL-to-Java
+
+Let me know if you need modifications or additional features!
