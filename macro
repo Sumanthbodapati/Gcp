@@ -1,5 +1,5 @@
 Function GetUTF8ByteLength(text As String) As Long
-    Dim bytes() As Byte
-    bytes = StrConv(text, vbFromUnicode)
-    GetUTF8ByteLength = LenB(bytes)
+    Dim UTF8 As Object
+    Set UTF8 = CreateObject("System.Text.UTF8Encoding") ' Create UTF-8 encoder
+    GetUTF8ByteLength = LenB(UTF8.GetBytes_4(text))
 End Function
