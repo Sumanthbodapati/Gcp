@@ -12,3 +12,10 @@ Secure and Stable Environment
 •  Tackled long-overdue vulnerabilities (some from last year!), boosting our security compliance.
 •  Jumped in on incident root cause analysis, vulnerability management, and ensuring our changes meet compliance standards.
 •  Played a big role in OCP and Liquibase migrations, Spring Boot upgrades, and Falcon enhancements, plus supported non-functional requirements, system hygiene, and team skill-building.
+
+Certainly! Here’s the revised list with OCP migration included:
+	•	Complete 100% migration of all components to Spring Boot 3.x and Java 17 with automated validation.
+	•	Fully onboard remaining services to EPL-X CI/CD pipeline and improve DORA metrics visibility.
+	•	Drive completion of OCP migration for all targeted applications, ensuring stability and performance.
+	•	Expand GenAI adoption by automating additional engineering tasks and creating a prompt library.
+	•	Close all pending vulnerabilities and integrate automated security scans into CI pipelines.
