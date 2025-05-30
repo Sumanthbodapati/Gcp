@@ -1,0 +1,14 @@
+Drive Innovation & Continuous Learning
+•  Pitched using OpenRewrite to automate Spring Boot upgrades (2.x to 3.x) and Java 17 migration—saved us a ton of manual work and headaches.
+•  Wrote up clear SOPs to guide teams through the process, making upgrades reusable and scalable for the future.
+•  Led the charge on migrating 60% of our app components, pulling teams together and keeping things on track.
+•  Knocked out all required GenAI and tech trainings, clocking over 24 hours of learning and snagging some certifications.
+Leverage AI to Enhance Productivity
+•  Used GitHub Copilot to speed up coding and debugging, especially during the migration grind.
+•  Crafted AI prompts and playbooks that helped the team get comfy with Java 17 and made debugging way smoother.
+•  Kicked off EPL-X adoption for better CI/CD alignment—still rolling out, but it’s coming along.
+•  Took the lead on documenting functional test cases in Octane, setting us up for better tracking and stronger test coverage.
+Secure and Stable Environment
+•  Tackled long-overdue vulnerabilities (some from last year!), boosting our security compliance.
+•  Jumped in on incident root cause analysis, vulnerability management, and ensuring our changes meet compliance standards.
+•  Played a big role in OCP and Liquibase migrations, Spring Boot upgrades, and Falcon enhancements, plus supported non-functional requirements, system hygiene, and team skill-building.
