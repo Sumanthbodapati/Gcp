@@ -18,4 +18,9 @@ Certainly! Here’s the revised list with OCP migration included:
 	•	Fully onboard remaining services to EPL-X CI/CD pipeline and improve DORA metrics visibility.
 	•	Drive completion of OCP migration for all targeted applications, ensuring stability and performance.
 	•	Expand GenAI adoption by automating additional engineering tasks and creating a prompt library.
-	•	Close all pending vulnerabilities and integrate automated security scans into CI pipelines.
+	•	Close all pending vulnerabilities and integrate automated security scans into CI 
+
+Over the past six months, I’ve taken the lead on key initiatives to boost application stability, compliance, and modernization. I spearheaded complex migrations to Spring Boot 3.x, Java 17, and the OCP platform, using OpenRewrite to automate upgrades and creating SOPs to streamline adoption across teams. To enhance delivery, I kicked off onboarding apps to the NextGen EPL-X CI/CD pipeline and prioritized testing by documenting functional test cases in Octane while boosting code coverage with tools like GitHub Copilot. On the security front, I tackled long-standing vulnerabilities and embedded secure coding practices. I also championed GenAI tools to automate tasks, improve productivity, and cut errors. Beyond technical work, I mentored teammates and fostered cross-team collaboration, aligning our efforts with goals for modernization, security, and engineering excellence. These efforts have set a solid foundation for continued progress this year.
+
+
+
