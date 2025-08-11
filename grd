@@ -1,0 +1,43 @@
+// Task to detect duplicate classes and conflicting versions
+task checkJarConflicts {
+    group = "verification"
+    description = "Checks for duplicate classes and conflicting JAR versions"
+
+    doLast {
+        println "🔍 Checking for duplicate classes in dependencies...\n"
+
+        // List all JARs in compile/runtime classpath
+        def jars = configurations.runtimeClasspath.files.findAll { it.name.endsWith('.jar') }
+        def classMap = [:].withDefault { [] }
+
+        jars.each { jar ->
+            try {
+                def entries = new java.util.zip.ZipFile(jar).entries().findAll { it.name.endsWith(".class") }
+                entries.each { entry ->
+                    classMap[entry.name] << jar.name
+                }
+            } catch (Exception ignored) {
+                // ignore broken jars
+            }
+        }
+
+        def duplicates = classMap.findAll { k, v -> v.size() > 1 }
+        if (duplicates) {
+            println "❌ Found duplicate classes:\n"
+            duplicates.each { className, jarList ->
+                println " - ${className} → ${jarList.join(', ')}"
+            }
+            throw new GradleException("Duplicate classes detected! Resolve the conflicts before building.")
+        } else {
+            println "✅ No duplicate classes found."
+        }
+
+        println "\n📦 Checking for conflicting dependency versions...\n"
+        configurations.all {
+            resolutionStrategy.failOnVersionConflict()
+        }
+    }
+}
+
+// Hook into the build process
+build.dependsOn checkJarConflicts
