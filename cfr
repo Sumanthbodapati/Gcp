@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+}
+
+import java.security.MessageDigest
+
+def cfrJar = file("$buildDir/tools/cfr.jar")
+
+// Download CFR automatically if not present
+tasks.register('downloadCFR') {
+    outputs.file(cfrJar)
+    doLast {
+        if (!cfrJar.exists()) {
+            ant.get(src: 'https://www.benf.org/other/cfr/cfr-0_152.jar', dest: cfrJar)
+        }
+    }
+}
+
+tasks.register('findDuplicateClasses', Exec) {
+    dependsOn 'downloadCFR'
+    doLast {
+        def jarsDir = file("$buildDir/libs") // or wherever your jars are
+        def workDir = file("$buildDir/jar_extract")
+        workDir.mkdirs()
+
+        // Extract all JARs
+        jarsDir.listFiles({ f -> f.name.endsWith(".jar") } as FileFilter).each { jar ->
+            def outDir = new File(workDir, jar.name.replace(".jar", ""))
+            outDir.mkdirs()
+            project.copy {
+                from zipTree(jar)
+                into outDir
+            }
+        }
+
+        // Find duplicates
+        def classMap = [:].withDefault { [] }
+        workDir.eachFileRecurse { f ->
+            if (f.name.endsWith(".class")) {
+                def relPath = workDir.toPath().relativize(f.toPath()).toString().replaceAll("^[^/]+/", "")
+                classMap[relPath] << f
+            }
+        }
+
+        // Compare decompiled code
+        classMap.findAll { k, v -> v.size() > 1 }.each { classPath, files ->
+            println "\n==== Checking: $classPath ===="
+            def tmpDirs = []
+            files.eachWithIndex { f, i ->
+                def tmpDir = new File(buildDir, "tmp_decompile/${i+1}")
+                tmpDir.mkdirs()
+                tmpDirs << tmpDir
+                exec {
+                    commandLine "java", "-jar", cfrJar.absolutePath, f.absolutePath,
+                            "--outputdir", tmpDir.absolutePath, "--silent", "true"
+                }
+            }
+
+            def java1 = new File(tmpDirs[0], classPath.replace(".class", ".java"))
+            def java2 = new File(tmpDirs[1], classPath.replace(".class", ".java"))
+
+            if (java1.exists() && java2.exists()) {
+                def diff = java.nio.file.Files.readAllLines(java1.toPath()) - java.nio.file.Files.readAllLines(java2.toPath())
+                if (!diff.isEmpty()) {
+                    println "Differences found:"
+                    println ">>> ${files[0].parentFile.name}"
+                    println ">>> ${files[1].parentFile.name}"
+                }
+            }
+        }
+    }
+}
