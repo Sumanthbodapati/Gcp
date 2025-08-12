@@ -1,0 +1,35 @@
+import java.util.zip.ZipFile
+import java.security.MessageDigest
+
+task findConflictingClasses {
+    doLast {
+        def jars = configurations.runtimeClasspath.files.findAll { it.name.endsWith('.jar') }
+        def classMap = [:].withDefault { [] }
+
+        def md5 = { bytes ->
+            MessageDigest.getInstance("MD5").digest(bytes).encodeHex().toString()
+        }
+
+        jars.each { jar ->
+            new ZipFile(jar).entries().findAll { !it.directory && it.name.endsWith('.class') }.each { entry ->
+                def bytes = new ZipFile(jar).getInputStream(entry).bytes
+                def checksum = md5(bytes)
+                classMap[entry.name] << [jar: jar.name, checksum: checksum]
+            }
+        }
+
+        def conflicts = classMap.findAll { name, copies ->
+            copies*.checksum.unique().size() > 1 // more than one unique bytecode version
+        }
+
+        if (conflicts.isEmpty()) {
+            println "✅ No conflicting classes with different bytecode found."
+        } else {
+            println "⚠ Conflicting classes with different bytecode:"
+            conflicts.each { name, copies ->
+                println "\nClass: ${name}"
+                copies.each { println "  - ${it.jar}" }
+            }
+        }
+    }
+}
