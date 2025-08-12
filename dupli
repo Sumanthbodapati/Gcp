@@ -1,0 +1,60 @@
+import java.security.MessageDigest
+import java.util.zip.ZipFile
+
+tasks.register("checkDuplicateClasses") {
+    group = "verification"
+    description = "Scans dependency jars for duplicate classes with different bytecode."
+
+    doLast {
+        def md5 = { File f ->
+            MessageDigest digest = MessageDigest.getInstance("MD5")
+            f.withInputStream { is ->
+                byte[] buffer = new byte[8192]
+                int read
+                while ((read = is.read(buffer)) > 0) {
+                    digest.update(buffer, 0, read)
+                }
+            }
+            digest.digest().encodeHex().toString()
+        }
+
+        def classMap = [:].withDefault { [:] }
+
+        // Collect all jars from compileClasspath
+        configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            if (artifact.file.name.endsWith(".jar")) {
+                ZipFile zip = new ZipFile(artifact.file)
+                zip.entries().each { entry ->
+                    if (!entry.isDirectory() && entry.name.endsWith(".class")) {
+                        // Extract entry to temp file for checksum
+                        File tempFile = File.createTempFile("cls", ".class")
+                        tempFile.deleteOnExit()
+                        tempFile.withOutputStream { os -> zip.getInputStream(entry).withStream { it.copyTo(os) } }
+
+                        def checksum = md5(tempFile)
+                        def jarName = artifact.file.name
+
+                        // Store mapping: class -> (checksum -> [jars])
+                        classMap[entry.name].computeIfAbsent(checksum) { [] } << jarName
+                    }
+                }
+            }
+        }
+
+        println "\n=== Duplicate Classes with Different Bytecode ==="
+        def found = false
+        classMap.each { className, checksumMap ->
+            if (checksumMap.size() > 1) {
+                found = true
+                println "\n[DIFFERENT] ${className}"
+                checksumMap.each { sum, jars ->
+                    println "  ${sum} -> ${jars.join(', ')}"
+                }
+            }
+        }
+
+        if (!found) {
+            println "✅ No risky duplicate classes found."
+        }
+    }
+}
