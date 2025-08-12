@@ -1,0 +1,61 @@
+import java.util.zip.CRC32
+import java.util.zip.ZipFile
+
+tasks.register("checkDuplicateClasses") {
+    group = "verification"
+    description = "Checks for duplicate classes in runtimeClasspath and fails if bytecode differs."
+
+    doLast {
+        def classMap = [:].withDefault { [] }
+
+        // Step 1: Collect all classes from runtimeClasspath JARs
+        configurations.runtimeClasspath.resolve().each { jarFile ->
+            if (jarFile.name.endsWith(".jar")) {
+                ZipFile zip = new ZipFile(jarFile)
+                zip.entries().each { entry ->
+                    if (entry.name.endsWith(".class")) {
+                        classMap[entry.name] << jarFile
+                    }
+                }
+                zip.close()
+            }
+        }
+
+        // Step 2: Find duplicates
+        def duplicates = classMap.findAll { k, v -> v.size() > 1 }
+
+        if (duplicates.isEmpty()) {
+            println "✅ No duplicate classes found."
+            return
+        }
+
+        println "Found ${duplicates.size()} duplicate classes. Checking for differences..."
+
+        def conflictFound = false
+
+        duplicates.each { className, jars ->
+            def checksums = [] as Set
+            jars.each { jarFile ->
+                ZipFile zip = new ZipFile(jarFile)
+                def entry = zip.getEntry(className)
+                def inputStream = zip.getInputStream(entry)
+                def buffer = inputStream.readAllBytes()
+                def crc = new CRC32()
+                crc.update(buffer)
+                checksums << crc.value
+                zip.close()
+            }
+            if (checksums.size() > 1) {
+                conflictFound = true
+                println "⚠️  Conflict in $className"
+                jars.each { println "   ↳ ${it.name}" }
+            }
+        }
+
+        if (conflictFound) {
+            throw new GradleException("Duplicate classes with different bytecode found!")
+        } else {
+            println "✅ All duplicate classes are identical (no conflict)."
+        }
+    }
+}
