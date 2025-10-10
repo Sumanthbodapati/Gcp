@@ -1,0 +1,14 @@
+index=your_index sourcetype=your_sourcetype
+| rex max_match=0 field=_raw "(?<candidate>(?:\d[ -]?){13,19})"
+| eval candidate_clean = replace(candidate, "[ -]", "")
+| where len(candidate_clean)>=13 AND len(candidate_clean)<=19
+| eval digits=split(candidate_clean,"")
+| eval rev=mvjoin(reverse(digits),"")
+| eval sum=0
+| foreach rev [ 
+    eval pos=mvindex(split(rev,""),<<FIELD>>-1),
+    eval num=tonumber(substr(rev,<<FIELD>>,1)),
+    eval sum = sum + if(mod(<<FIELD>>,2)=0, if(num*2>9,num*2-9,num*2), num)
+]
+| where mod(sum,10)=0
+| table _time host source candidate_clean
